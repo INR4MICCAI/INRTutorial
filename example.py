@@ -6,23 +6,23 @@ from torch import nn
 from torch.utils.data import DataLoader
 import lightning as pl
 
-from medmnist import RetinaMNIST
+from medmnist import RetinaMNIST, BreastMNIST
 from data.datasets import RandomPointsDataset, MedMNISTDataset
 from networks.decoders import MLP
 from networks.layers import SineLayer, ReluLayer, WIRELayer
 from networks.heads import ReconstructionHead
 from networks.pos_encoders import FourierFeatPosEncoder, IdentityPosEncoder
 
-IMAGE_SIZE = 64
-train_dataset = MedMNISTDataset(RetinaMNIST(split="train", download=True, size=IMAGE_SIZE), num_points=1000)
+IMAGE_SIZE = 224
+train_dataset = MedMNISTDataset(BreastMNIST(split="val", download=True, size=IMAGE_SIZE, ), num_points=2048)
 
 
 class INR(pl.LightningModule):
-    def __init__(self, coord_size, out_size, hidden_size=64):
+    def __init__(self, coord_size, out_size, hidden_size=128, num_layers=2):
         super().__init__()
-        # self.pos_enc = IdentityPosEncoder(coord_size)
-        self.pos_enc = FourierFeatPosEncoder(coord_size, freq_num=hidden_size//2)
-        self.network = MLP(self.pos_enc.out_size, hidden_size=hidden_size, num_layers=4, layer_class=ReluLayer)
+        self.pos_enc = IdentityPosEncoder(coord_size)
+        # self.pos_enc = FourierFeatPosEncoder(coord_size, freq_num=hidden_size//2)
+        self.network = MLP(self.pos_enc.out_size, hidden_size=hidden_size, num_layers=num_layers, layer_class=ReluLayer)
         self.head = ReconstructionHead(self.network.out_size, out_size)
         self.progress_ims = []
 
@@ -41,7 +41,7 @@ class INR(pl.LightningModule):
         outputs = self.forward(coords)
         loss = nn.functional.mse_loss(outputs, values)
         if any([self.current_epoch == i for i in [0, 10, 50, 200, 1000, 5000, 10000]]):
-            pred_im = inr.sample_at_resolution([IMAGE_SIZE] * coords.shape[-1])
+            pred_im = self.sample_at_resolution([IMAGE_SIZE] * coords.shape[-1])
             self.progress_ims.append(pred_im.cpu().numpy())
         return loss
 

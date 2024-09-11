@@ -90,8 +90,8 @@ class ComplexWIRELayer(AbstractLayer):
 
 class WIRELayer(AbstractLayer):
     """
-        TODO: cite WIRE paper and github.
         Implicit representation with Gabor nonlinearity
+        Implementation taken from https://github.com/vishwa91/wire
     """
 
     def __init__(self, in_size, out_size, bias=True, wire_omega: float = 10.0, wire_sigma: float = 40.0, **kwargs):
