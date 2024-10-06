@@ -40,7 +40,7 @@ class SIRENLayer(AbstractLayer):
         Implementation partly based on SIREN colab notebook:
         https://colab.research.google.com/github/vsitzmann/siren/blob/master/explore_siren.ipynb
     """
-    def __init__(self, in_size, out_size, siren_factor=30., is_first=False, **kwargs):
+    def __init__(self, in_size, out_size, siren_factor=30., **kwargs):
         super(SIRENLayer, self).__init__(in_size, out_size, **kwargs)
         # See paper sec. 3.2, final paragraph, and supplement Sec. 1.5 for discussion of factor 30
         self.siren_factor = siren_factor
@@ -59,7 +59,7 @@ class WIRELayer(AbstractLayer):
         Implementation based of https://github.com/vishwa91/wire
     """
 
-    def __init__(self, in_size, out_size, wire_omega: float = 10.0, wire_sigma: float = 40.0, is_first=False, **kwargs):
+    def __init__(self, in_size, out_size, wire_omega: float = 10.0, wire_sigma: float = 40.0, **kwargs):
         super(WIRELayer, self).__init__(in_size, out_size, **kwargs)
         self.omega_0 = wire_omega  # Freq
         self.scale_0 = wire_sigma
