@@ -125,7 +125,7 @@ pl_module = INRLightningModule(inr, gt_image, pos_encoder=pos_encoder)
 
 
 # ------------  Training  -------------------------------
-TRAINING_EPOCHS = 10_000
+TRAINING_EPOCHS = 20_000
 trainer = pl.Trainer(max_epochs=TRAINING_EPOCHS)
 s = datetime.now()
 trainer.fit(pl_module, train_dataloaders=DataLoader(dataset, batch_size=1))
