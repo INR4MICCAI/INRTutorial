@@ -24,44 +24,6 @@ class AbstractPosEncoder(nn.Module):
         return f"{self.__class__} (in_size: {self.in_size}, out_size: {self.out_size})"
 
 
-class IdentityPosEncoder(AbstractPosEncoder):
-    def __init__(self, coord_size: int, **kwargs):
-        super(IdentityPosEncoder, self).__init__(coord_size, **kwargs)
-
-    @property
-    def out_size(self):
-        return self._in_size
-
-    def forward(self, coords):
-        return coords
-
-
-# class NeRFPosEncoder(AbstractPosEncoder):
-#     '''Module to add positional encoding as in NeRF [Mildenhall et al. 2020].'''
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.num_frequencies = kwargs.get("num_frequencies")
-#         assert isinstance(self.num_frequencies, tuple)
-#         assert len(self.num_frequencies) == self.in_features
-#
-#         self.out_dim = self.in_features + 2 * np.sum(self.num_frequencies)
-#
-#     def forward(self, coords):
-#         coords = coords.view(coords.shape[0], self.in_features)
-#
-#         coords_pos_enc = coords
-#         for j, dim_freqs in enumerate(self.num_frequencies):
-#             for i in range(dim_freqs):
-#                 c = coords[..., j]
-#
-#                 sin = torch.unsqueeze(torch.sin((2 ** i) * np.pi * c), -1)
-#                 cos = torch.unsqueeze(torch.cos((2 ** i) * np.pi * c), -1)
-#
-#                 coords_pos_enc = torch.cat((coords_pos_enc, sin, cos), axis=-1)
-#
-#         return coords_pos_enc.reshape(coords.shape[0], self.out_dim)
-
-
 class NeRFPosEncoder(AbstractPosEncoder):
     """ Vectorized version of the positional encoder from the official NeRF paper [Mildenhall et al. 2020].
      Original implementation found above. """
@@ -74,7 +36,6 @@ class NeRFPosEncoder(AbstractPosEncoder):
         self.freq_num = freq_num
         self.freq_scale = freq_scale
         # Pre-initialize the frequency components. Each coordinate may have a different number of frequencies.
-        # TODO: Add this to GPU ahead of time? How to nicely ask the user for argument?
         self.exp_i_pi = torch.cat([2**torch.arange(i, dtype=torch.float32)[None] * self.freq_scale * np.pi
                                    for i in self.freq_num],
                                   dim=1)
@@ -99,7 +60,6 @@ class FourierFeatPosEncoder(AbstractPosEncoder):
         assert isinstance(freq_num, int)
         self.freq_num = freq_num
         self.freq_scale = freq_scale
-        # TODO: Add this to GPU ahead of time? How to nicely ask the user for argument?
         self.B_gauss = torch.normal(0.0, 1.0, size=(coord_size, self.freq_num), requires_grad=False) * self.freq_scale
         self.B_gauss_pi = 2. * np.pi * self.B_gauss
 
